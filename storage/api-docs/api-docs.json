@@ -973,7 +973,252 @@
                     }
                 ]
             }
+        },
+        "/api/declarations": {
+            "post": {
+                "tags": ["Declaration"],
+                "summary": "Créer une déclaration de vol",
+                "description": "Permet à l'utilisateur connecté de créer une déclaration de moto volée",
+                "security": [{"bearerAuth":[]}],
+                "requestBody": {
+                "required": true,
+                "content": {
+                    "multipart/form-data": {
+                    "schema": {
+                        "required": ["brand","model","color","theft_date","theft_location"],
+                        "properties": {
+                        "plate_number": {"type":"string","example":"1234AB56"},
+                        "chassis_number": {"type":"string","example":"CHS123456789"},
+                        "card_number": {"type":"string","example":"CAR123456"},
+                        "brand": {"type":"string","example":"Honda"},
+                        "model": {"type":"string","example":"CBR500R"},
+                        "color": {"type":"string","example":"Rouge"},
+                        "theft_date": {"type":"string","format":"date","example":"2025-09-21"},
+                        "theft_location": {"type":"string","example":"Secteur 15, Ouagadougou"},
+                        "pictures": {
+                            "type":"array",
+                            "items":{"type":"string","format":"binary"},
+                            "description":"Photos de la moto volée (max 5)"
+                        }
+                        }
+                    }
+                    }
+                }
+                },
+                "responses": {
+                "201": {
+                    "description": "Déclaration créée avec succès",
+                    "content": {
+                    "application/json": {
+                        "schema": {
+                        "properties": {
+                            "success":{"type":"boolean","example":true},
+                            "message":{"type":"string","example":"Déclaration créée avec succès"},
+                            "data":{
+                            "type":"object",
+                            "properties":{
+                                "id":{"type":"string","example":"1"},
+                                "plate_number":{"type":"string","example":"1234AB56"},
+                                "chassis_number":{"type":"string","example":"CHS123456789"},
+                                "card_number":{"type":"string","example":"CAR123456"},
+                                "brand":{"type":"string","example":"Honda"},
+                                "model":{"type":"string","example":"CBR500R"},
+                                "color":{"type":"string","example":"Rouge"},
+                                "theft_date":{"type":"string","format":"date","example":"2025-09-21"},
+                                "theft_location":{"type":"string","example":"Secteur 15, Ouagadougou"},
+                                "status":{"type":"string","example":"pending"},
+                                "pictures":{"type":"array","items":{"type":"string"}},
+                                "created_at":{"type":"string","format":"datetime"}
+                            }
+                            }
+                        }
+                        }
+                    }
+                    }
+                },
+                "403": {
+                    "description": "Utilisateur non autorisé à créer une déclaration",
+                    "content": {
+                    "application/json": {
+                        "schema": {
+                        "properties":{
+                            "success":{"type":"boolean","example":false},
+                            "message":{"type":"string","example":"Vous devez compléter votre profil avant de créer une déclaration"}
+                        }
+                        }
+                    }
+                    }
+                },
+                "422": {
+                    "description":"Erreur de validation",
+                    "content":{
+                    "application/json":{
+                        "schema":{
+                        "properties":{
+                            "success":{"type":"boolean","example":false},
+                            "message":{"type":"string","example":"Données invalides"},
+                            "errors":{"type":"object"}
+                        }
+                        }
+                    }
+                    }
+                }
+                }
+            },
+            "get": {
+                "tags":["Declaration"],
+                "summary":"Lister les déclarations de l'utilisateur",
+                "description":"Retourne toutes les déclarations de l'utilisateur connecté",
+                "security":[{"bearerAuth":[]}],
+                "responses":{
+                "200":{
+                    "description":"Liste des déclarations",
+                    "content":{
+                    "application/json":{
+                        "schema":{
+                        "properties":{
+                            "success":{"type":"boolean","example":true},
+                            "data":{
+                            "type":"array",
+                            "items":{
+                                "type":"object",
+                                "properties":{
+                                "id":{"type":"string","example":"1"},
+                                "plate_number":{"type":"string","example":"1234AB56"},
+                                "chassis_number":{"type":"string","example":"CHS123456789"},
+                                "card_number":{"type":"string","example":"CAR123456"},
+                                "brand":{"type":"string","example":"Honda"},
+                                "model":{"type":"string","example":"CBR500R"},
+                                "color":{"type":"string","example":"Rouge"},
+                                "theft_date":{"type":"string","format":"date","example":"2025-09-21"},
+                                "theft_location":{"type":"string","example":"Secteur 15, Ouagadougou"},
+                                "status":{"type":"string","example":"pending"},
+                                "pictures":{"type":"array","items":{"type":"string"}},
+                                "created_at":{"type":"string","format":"datetime"},
+                                "updated_at":{"type":"string","format":"datetime"}
+                                }
+                            }
+                            }
+                        }
+                        }
+                    }
+                    }
+                }
+                }
+            }
+        },
+        "/api/declarations/{id}": {
+        "get":{
+            "tags":["Declaration"],
+            "summary":"Voir une déclaration spécifique",
+            "description":"Retourne les détails d'une déclaration par ID",
+            "security":[{"bearerAuth":[]}],
+            "parameters":[
+            {"name":"id","in":"path","required":true,"schema":{"type":"string"}}
+            ],
+            "responses":{
+            "200":{"description":"Détails de la déclaration"},
+            "403":{"description":"Accès non autorisé"},
+            "404":{"description":"Déclaration non trouvée"}
+            }
+        },
+        "put": {
+            "tags":["Declaration"],
+            "summary":"Mettre à jour une déclaration",
+            "description":"Permet de modifier les informations d'une déclaration existante",
+            "security":[{"bearerAuth":[]}],
+            "parameters":[
+            {"name":"id","in":"path","required":true,"schema":{"type":"string"}}
+            ],
+            "requestBody":{
+            "required": true,
+            "content":{
+                "application/json":{
+                "schema":{
+                    "properties":{
+                    "plate_number":{"type":"string","example":"1234AB56"},
+                    "chassis_number":{"type":"string","example":"CHS123456789"},
+                    "card_number":{"type":"string","example":"CAR123456"},
+                    "brand":{"type":"string","example":"Honda"},
+                    "model":{"type":"string","example":"CBR500R"},
+                    "color":{"type":"string","example":"Rouge"},
+                    "theft_date":{"type":"string","format":"date","example":"2025-09-21"},
+                    "theft_location":{"type":"string","example":"Secteur 15, Ouagadougou"}
+                    }
+                }
+                }
+            }
+            },
+            "responses":{
+            "200":{"description":"Déclaration mise à jour avec succès"},
+            "403":{"description":"Accès non autorisé"},
+            "404":{"description":"Déclaration non trouvée"},
+            "422":{"description":"Erreur de validation"}
+            }
+        },
+        "post": {
+            "tags":["Declaration"],
+            "summary":"Ajouter des photos à une déclaration",
+            "description":"Uploader une ou plusieurs photos supplémentaires pour une déclaration existante",
+            "security":[{"bearerAuth":[]}],
+            "parameters":[
+            {"name":"id","in":"path","required":true,"schema":{"type":"string"}}
+            ],
+            "requestBody":{
+            "required": true,
+            "content":{
+                "multipart/form-data":{
+                "schema":{
+                    "properties":{
+                    "pictures":{
+                        "type":"array",
+                        "items":{"type":"string","format":"binary"},
+                        "description":"Photos à ajouter (max 5)"
+                    }
+                    }
+                }
+                }
+            }
+            },
+            "responses":{
+            "200":{"description":"Photos ajoutées avec succès"},
+            "403":{"description":"Accès non autorisé"},
+            "404":{"description":"Déclaration non trouvée"},
+            "422":{"description":"Erreur de validation"}
+            }
         }
+        },
+        "/api/declarations/{id}/status": {
+        "put":{
+            "tags":["Declaration"],
+            "summary":"Mettre à jour le statut d'une déclaration",
+            "description":"Permet à l'admin ou à l'agent de changer le statut d'une déclaration (ex: pending, validated, rejected)",
+            "security":[{"bearerAuth":[]}],
+            "parameters":[
+            {"name":"id","in":"path","required":true,"schema":{"type":"string"}}
+            ],
+            "requestBody":{
+            "required": true,
+            "content":{
+                "application/json":{
+                "schema":{
+                    "required":["status"],
+                    "properties":{
+                    "status":{"type":"string","example":"validated"}
+                    }
+                }
+                }
+            }
+            },
+            "responses":{
+            "200":{"description":"Statut mis à jour avec succès"},
+            "403":{"description":"Accès non autorisé"},
+            "404":{"description":"Déclaration non trouvée"},
+            "422":{"description":"Erreur de validation"}
+            }
+        }
+        }
+
     },
     "components": {
         "securitySchemes": {
@@ -993,6 +1238,10 @@
         {
             "name": "Profile",
             "description": "Gestion du profil utilisateur"
+        },
+        {
+            "name": "Delcaration",
+            "description": "Gestion des déclarations de vol"        
         }
     ]
 }

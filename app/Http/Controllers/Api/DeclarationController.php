@@ -17,6 +17,72 @@ class DeclarationController extends Controller
     ) {}
 
     /**
+     * @OA\Post(
+     *     path="/api/declarations",
+     *     tags={"Declarations"},
+     *     summary="Créer une déclaration de vol",
+     *     description="Permet à l'utilisateur connecté de créer une déclaration de moto volée",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"brand","model","color","theft_date","theft_location"},
+     *                 @OA\Property(property="plate_number", type="string", example="1234AB56"),
+     *                 @OA\Property(property="chassis_number", type="string", example="CHS123456789"),
+     *                 @OA\Property(property="card_number", type="string", example="CAR123456"),
+     *                 @OA\Property(property="brand", type="string", example="Honda"),
+     *                 @OA\Property(property="model", type="string", example="CBR500R"),
+     *                 @OA\Property(property="color", type="string", example="Rouge"),
+     *                 @OA\Property(property="theft_date", type="string", format="date", example="2025-09-21"),
+     *                 @OA\Property(property="theft_location", type="string", example="Secteur 15, Ouagadougou"),
+     *                 @OA\Property(property="pictures", type="array", @OA\Items(type="string", format="binary"), description="Photos de la moto volée (max 5)")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Déclaration créée avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Déclaration créée avec succès"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="string", example="1"),
+     *                 @OA\Property(property="plate_number", type="string", example="1234AB56"),
+     *                 @OA\Property(property="chassis_number", type="string", example="CHS123456789"),
+     *                 @OA\Property(property="card_number", type="string", example="CAR123456"),
+     *                 @OA\Property(property="brand", type="string", example="Honda"),
+     *                 @OA\Property(property="model", type="string", example="CBR500R"),
+     *                 @OA\Property(property="color", type="string", example="Rouge"),
+     *                 @OA\Property(property="theft_date", type="string", format="date", example="2025-09-21"),
+     *                 @OA\Property(property="theft_location", type="string", example="Secteur 15, Ouagadougou"),
+     *                 @OA\Property(property="status", type="string", example="pending"),
+     *                 @OA\Property(property="pictures", type="array", @OA\Items(type="string")),
+     *                 @OA\Property(property="created_at", type="string", format="datetime")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Données invalides"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Utilisateur non autorisé à créer une déclaration",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Vous devez compléter votre profil avant de créer une déclaration")
+     *         )
+     *     )
+     * )
+     */
+    /**
      * Create a new declaration
      */
     public function store(Request $request): JsonResponse
@@ -99,6 +165,39 @@ class DeclarationController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/declarations",
+     *     tags={"Declarations"},
+     *     summary="Lister les déclarations de l'utilisateur",
+     *     description="Retourne toutes les déclarations de l'utilisateur connecté",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des déclarations",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="id", type="string"),
+     *                     @OA\Property(property="plate_number", type="string"),
+     *                     @OA\Property(property="chassis_number", type="string"),
+     *                     @OA\Property(property="card_number", type="string"),
+     *                     @OA\Property(property="brand", type="string"),
+     *                     @OA\Property(property="model", type="string"),
+     *                     @OA\Property(property="color", type="string"),
+     *                     @OA\Property(property="theft_date", type="string", format="date"),
+     *                     @OA\Property(property="theft_location", type="string"),
+     *                     @OA\Property(property="status", type="string"),
+     *                     @OA\Property(property="pictures", type="array", @OA\Items(type="string")),
+     *                     @OA\Property(property="created_at", type="string", format="datetime"),
+     *                     @OA\Property(property="updated_at", type="string", format="datetime")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    /**
      * Get user's declarations
      */
     public function index(Request $request): JsonResponse
@@ -135,6 +234,25 @@ class DeclarationController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/declarations/{id}",
+     *     tags={"Declarations"},
+     *     summary="Voir une déclaration spécifique",
+     *     description="Retourne les détails d'une déclaration par ID",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(response=200, description="Détails de la déclaration"),
+     *     @OA\Response(response=403, description="Accès non autorisé"),
+     *     @OA\Response(response=404, description="Déclaration non trouvée")
+     * )
+     */
 
     /**
      * Get a specific declaration
@@ -187,6 +305,25 @@ class DeclarationController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * @OA\Put(
+     *     path="/api/declarations/{id}/status",
+     *     tags={"Declarations"},
+     *     summary="Mettre à jour le statut d'une déclaration",
+     *     description="Permet à un administrateur d'entité de mettre à jour le statut",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\RequestBody(required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", enum={"pending","found","closed"}, example="pending")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Statut mis à jour"),
+     *     @OA\Response(response=403, description="Accès non autorisé"),
+     *     @OA\Response(response=404, description="Déclaration non trouvée")
+     * )
+     */
 
     /**
      * Update declaration status (for admins)
@@ -247,6 +384,31 @@ class DeclarationController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * @OA\Post(
+     *     path="/api/declarations/{id}/pictures",
+     *     tags={"Declarations"},
+     *     summary="Ajouter des photos à une déclaration",
+     *     description="Permet à l'utilisateur de compléter sa déclaration avec de nouvelles photos",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"pictures"},
+     *                 @OA\Property(property="pictures", type="array", @OA\Items(type="string", format="binary"), description="Photos à ajouter (max 5)")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Photos ajoutées avec succès"),
+     *     @OA\Response(response=403, description="Accès non autorisé"),
+     *     @OA\Response(response=404, description="Déclaration non trouvée"),
+     *     @OA\Response(response=422, description="Erreur de validation")
+     * )
+     */
 
     /**
      * Add pictures to existing declaration
