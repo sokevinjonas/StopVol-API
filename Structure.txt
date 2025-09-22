@@ -1,0 +1,40 @@
+stopvol-backend/
+│
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── AuthController.php
+│   │   │   ├── ProfileController.php
+│   │   │   ├── DeclarationController.php
+│   │   │   └── AdminController.php
+│   │   └── Middleware/
+│   │
+│   ├── Models/
+│   │   ├── User.php
+│   │   ├── Declaration.php
+│   │   ├── DeclarationImage.php
+│   │   ├── Admin.php
+│   │   └── Notification.php
+│   │
+│   ├── Services/
+│   │   ├── AuthService.php
+│   │   ├── ProfileService.php
+│   │   ├── DeclarationService.php
+│   │   └── NotificationService.php
+│   │
+│   ├── Jobs/
+│   │   └── SendNotificationJob.php
+│   │
+│   ├── Repositories/ (optionnel pour séparer la DB)
+│   │   ├── UserRepository.php
+│   │   └── DeclarationRepository.php
+│   │
+│   └── Helpers/
+│       └── OtpHelper.php
+│
+├── database/
+│   ├── migrations/
+│   └── seeders/
+│
+└── routes/
+    └── api.php
