@@ -23,6 +23,8 @@ class AuthController extends Controller
     {
         $request->validate([
             'phone_number' => 'required|string',
+        ], [
+            'phone_number.required' => 'Le numéro de téléphone est requis',
         ]);
 
         try {
