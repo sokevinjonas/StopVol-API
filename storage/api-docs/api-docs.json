@@ -1,0 +1,930 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "StopVol API",
+        "description": "API pour la déclaration de vol de véhicules au Burkina Faso",
+        "contact": {
+            "email": "contact@stopvol.bf"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "StopVol API Server"
+        }
+    ],
+    "paths": {
+        "/api/auth/request-otp": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Demander un code OTP",
+                "description": "Envoie un code OTP au numéro de téléphone fourni",
+                "operationId": "69d5912e30f5b07007692928d61cd9ad",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone_number"
+                                ],
+                                "properties": {
+                                    "phone_number": {
+                                        "description": "Numéro de téléphone",
+                                        "type": "string",
+                                        "example": "+22670123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP envoyé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP envoyé avec succès"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Le numéro de téléphone est requis"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur lors de l'envoi de l'OTP"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/verify-otp": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Vérifier le code OTP",
+                "description": "Vérifie le code OTP et retourne un token d'authentification",
+                "operationId": "8d451369bebcf6d82f35d85565bb3e52",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone_number",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "phone_number": {
+                                        "description": "Numéro de téléphone",
+                                        "type": "string",
+                                        "example": "+22670123456"
+                                    },
+                                    "otp": {
+                                        "description": "Code OTP à 6 chiffres",
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Connexion réussie"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abcdef123456..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "OTP invalide ou expiré",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP invalide ou expiré"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/declarations": {
+            "post": {
+                "tags": [
+                    "Declarations"
+                ],
+                "summary": "Créer une déclaration de vol",
+                "description": "Permet de créer une nouvelle déclaration de vol de véhicule avec les documents justificatifs",
+                "operationId": "9299e2ad4b6e7959b32acdb814822b5a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "plaque",
+                                    "date_vol",
+                                    "lieu_vol",
+                                    "images"
+                                ],
+                                "properties": {
+                                    "plaque": {
+                                        "description": "Numéro de plaque du véhicule volé",
+                                        "type": "string",
+                                        "maxLength": 20,
+                                        "example": "11-BF-1234"
+                                    },
+                                    "description": {
+                                        "description": "Description détaillée du vol",
+                                        "type": "string",
+                                        "example": "Véhicule Toyota Corolla blanc volé devant la maison"
+                                    },
+                                    "date_vol": {
+                                        "description": "Date du vol",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-01-15"
+                                    },
+                                    "lieu_vol": {
+                                        "description": "Lieu du vol",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Ouagadougou, Secteur 15"
+                                    },
+                                    "images": {
+                                        "description": "Images des documents justificatifs (minimum 1)",
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "document_type",
+                                                "file"
+                                            ],
+                                            "properties": {
+                                                "document_type": {
+                                                    "description": "Type de document",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "cnib",
+                                                        "permis_conduire",
+                                                        "passport",
+                                                        "photo"
+                                                    ],
+                                                    "example": "cnib"
+                                                },
+                                                "type": {
+                                                    "description": "Face du document",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "card_front",
+                                                        "card_back"
+                                                    ],
+                                                    "example": "card_front"
+                                                },
+                                                "file": {
+                                                    "description": "Fichier image (max 2MB)",
+                                                    "type": "string",
+                                                    "format": "binary"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Déclaration créée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Déclaration créée avec succès"
+                                        },
+                                        "declaration": {
+                                            "$ref": "#/components/schemas/Declaration"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erreur lors de la création de la déclaration"
+                                        },
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/declarations/search": {
+            "get": {
+                "tags": [
+                    "Declarations"
+                ],
+                "summary": "Rechercher une déclaration par plaque",
+                "description": "Permet de rechercher une déclaration de vol par numéro de plaque (accès admin)",
+                "operationId": "fc80536d963bfee79bf56c8053549266",
+                "parameters": [
+                    {
+                        "name": "plaque",
+                        "in": "query",
+                        "description": "Numéro de plaque à rechercher",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 20,
+                            "example": "11-BF-1234"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Déclaration trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Declaration"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Aucune déclaration trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Aucune déclaration trouvée pour cette plaque"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/complete": {
+            "post": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Compléter le profil utilisateur",
+                "description": "Permet à l'utilisateur de compléter son profil avec ses informations personnelles et documents",
+                "operationId": "bb46e11804ea472681b0e928aa4fc479",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "city",
+                                    "district"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Nom complet",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Jean Dupont"
+                                    },
+                                    "photo": {
+                                        "description": "Photo de profil (max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "document_type": {
+                                        "description": "Type de document d'identité",
+                                        "type": "string",
+                                        "enum": [
+                                            "cnib",
+                                            "permis_conduire",
+                                            "passport"
+                                        ],
+                                        "example": "cnib"
+                                    },
+                                    "document_number": {
+                                        "description": "Numéro du document",
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "B123456789"
+                                    },
+                                    "document_front": {
+                                        "description": "Photo recto du document (max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "document_back": {
+                                        "description": "Photo verso du document (max 2MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "city": {
+                                        "description": "Ville",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Ouagadougou"
+                                    },
+                                    "district": {
+                                        "description": "District/Secteur",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Secteur 15"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil complété avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profil complété avec succès"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/is-complete": {
+            "get": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Vérifier si le profil est complet",
+                "description": "Vérifie si l'utilisateur a complété son profil",
+                "operationId": "932076c19ee1fee26e2c505ca6c53b1a",
+                "responses": {
+                    "200": {
+                        "description": "Statut du profil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "is_complete": {
+                                            "description": "Indique si le profil est complet",
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "title": "User",
+                "description": "Modèle utilisateur",
+                "properties": {
+                    "id": {
+                        "description": "Identifiant unique de l'utilisateur",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "phone_number": {
+                        "description": "Numéro de téléphone",
+                        "type": "string",
+                        "example": "+22670123456"
+                    },
+                    "name": {
+                        "description": "Nom complet",
+                        "type": "string",
+                        "example": "Jean Dupont"
+                    },
+                    "photo": {
+                        "description": "Chemin vers la photo de profil",
+                        "type": "string",
+                        "example": "photos/user123.jpg",
+                        "nullable": true
+                    },
+                    "document_type": {
+                        "description": "Type de document d'identité",
+                        "type": "string",
+                        "enum": [
+                            "cnib",
+                            "permis_conduire",
+                            "passport"
+                        ],
+                        "example": "cnib",
+                        "nullable": true
+                    },
+                    "document_number": {
+                        "description": "Numéro du document",
+                        "type": "string",
+                        "example": "B123456789",
+                        "nullable": true
+                    },
+                    "document_front": {
+                        "description": "Photo recto du document",
+                        "type": "string",
+                        "example": "documents/front123.jpg",
+                        "nullable": true
+                    },
+                    "document_back": {
+                        "description": "Photo verso du document",
+                        "type": "string",
+                        "example": "documents/back123.jpg",
+                        "nullable": true
+                    },
+                    "city": {
+                        "description": "Ville",
+                        "type": "string",
+                        "example": "Ouagadougou",
+                        "nullable": true
+                    },
+                    "district": {
+                        "description": "District/Secteur",
+                        "type": "string",
+                        "example": "Secteur 15",
+                        "nullable": true
+                    },
+                    "entity_id": {
+                        "description": "ID de l'entité (commissariat/gendarmerie)",
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "description": "Date de création",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:00Z"
+                    },
+                    "updated_at": {
+                        "description": "Date de mise à jour",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Declaration": {
+                "title": "Declaration",
+                "description": "Modèle déclaration de vol",
+                "properties": {
+                    "id": {
+                        "description": "Identifiant unique de la déclaration",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440001"
+                    },
+                    "user_id": {
+                        "description": "ID de l'utilisateur déclarant",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    },
+                    "plate_number": {
+                        "description": "Numéro de plaque du véhicule",
+                        "type": "string",
+                        "example": "11-BF-1234"
+                    },
+                    "chassis_number": {
+                        "description": "Numéro de châssis",
+                        "type": "string",
+                        "example": "VF1234567890",
+                        "nullable": true
+                    },
+                    "card_number": {
+                        "description": "Numéro de carte grise",
+                        "type": "string",
+                        "example": "CG123456",
+                        "nullable": true
+                    },
+                    "brand": {
+                        "description": "Marque du véhicule",
+                        "type": "string",
+                        "example": "Toyota",
+                        "nullable": true
+                    },
+                    "model": {
+                        "description": "Modèle du véhicule",
+                        "type": "string",
+                        "example": "Corolla",
+                        "nullable": true
+                    },
+                    "color": {
+                        "description": "Couleur du véhicule",
+                        "type": "string",
+                        "example": "Blanc",
+                        "nullable": true
+                    },
+                    "pictures": {
+                        "description": "Photos du véhicule",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "photo1.jpg",
+                            "photo2.jpg"
+                        ],
+                        "nullable": true
+                    },
+                    "theft_date": {
+                        "description": "Date du vol",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-01-15"
+                    },
+                    "theft_location": {
+                        "description": "Lieu du vol",
+                        "type": "string",
+                        "example": "Ouagadougou, Secteur 15"
+                    },
+                    "status": {
+                        "description": "Statut de la déclaration",
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "approved",
+                            "rejected"
+                        ],
+                        "example": "pending"
+                    },
+                    "created_at": {
+                        "description": "Date de création",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:00Z"
+                    },
+                    "updated_at": {
+                        "description": "Date de mise à jour",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:00Z"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    },
+                    "images": {
+                        "description": "Images associées à la déclaration",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DeclarationImage"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "DeclarationImage": {
+                "title": "DeclarationImage",
+                "description": "Image associée à une déclaration",
+                "properties": {
+                    "id": {
+                        "description": "Identifiant unique de l'image",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440002"
+                    },
+                    "declaration_id": {
+                        "description": "ID de la déclaration",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "550e8400-e29b-41d4-a716-446655440001"
+                    },
+                    "document_type": {
+                        "description": "Type de document",
+                        "type": "string",
+                        "enum": [
+                            "cnib",
+                            "permis_conduire",
+                            "passport",
+                            "photo"
+                        ],
+                        "example": "cnib"
+                    },
+                    "type": {
+                        "description": "Face du document",
+                        "type": "string",
+                        "enum": [
+                            "card_front",
+                            "card_back"
+                        ],
+                        "example": "card_front",
+                        "nullable": true
+                    },
+                    "path": {
+                        "description": "Chemin vers l'image",
+                        "type": "string",
+                        "example": "declaration_images/image123.jpg"
+                    },
+                    "created_at": {
+                        "description": "Date de création",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:00Z"
+                    },
+                    "updated_at": {
+                        "description": "Date de mise à jour",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format (Bearer <token>)",
+                "name": "Authorization",
+                "in": "header"
+            },
+            "0": {
+                "sanctum": []
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        },
+        {
+            "name": "Declarations",
+            "description": "Declarations"
+        },
+        {
+            "name": "Profile",
+            "description": "Profile"
+        }
+    ]
+}

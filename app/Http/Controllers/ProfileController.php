@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\ProfileService;
 use Illuminate\Support\Facades\Auth;
+use OpenApi\Attributes as OA;
 
-class ProfileController extends Controller
+class ProfileController extends BaseController
 {
     protected $profileService;
 
@@ -16,8 +17,53 @@ class ProfileController extends Controller
     }
 
     /**
-     * Compléter le profil de l'utilisateur
-     * POST /api/profile/complete
+     * @OA\Post(
+     *     path="/api/profile/complete",
+     *     summary="Compléter le profil utilisateur",
+     *     description="Permet à l'utilisateur de compléter son profil avec ses informations personnelles et documents",
+     *     tags={"Profile"},
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"name", "city", "district"},
+     *                 @OA\Property(property="name", type="string", maxLength=255, example="Jean Dupont", description="Nom complet"),
+     *                 @OA\Property(property="photo", type="string", format="binary", description="Photo de profil (max 2MB)"),
+     *                 @OA\Property(property="document_type", type="string", enum={"cnib", "permis_conduire", "passport"}, example="cnib", description="Type de document d'identité"),
+     *                 @OA\Property(property="document_number", type="string", maxLength=50, example="B123456789", description="Numéro du document"),
+     *                 @OA\Property(property="document_front", type="string", format="binary", description="Photo recto du document (max 2MB)"),
+     *                 @OA\Property(property="document_back", type="string", format="binary", description="Photo verso du document (max 2MB)"),
+     *                 @OA\Property(property="city", type="string", maxLength=255, example="Ouagadougou", description="Ville"),
+     *                 @OA\Property(property="district", type="string", maxLength=255, example="Secteur 15", description="District/Secteur")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profil complété avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Profil complété avec succès"),
+     *             @OA\Property(property="user", ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non authentifié",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
      */
     public function complete(Request $request)
     {
@@ -54,8 +100,27 @@ class ProfileController extends Controller
     }
 
     /**
-     * Vérifie si le profil est complet
-     * GET /api/profile/is-complete
+     * @OA\Get(
+     *     path="/api/profile/is-complete",
+     *     summary="Vérifier si le profil est complet",
+     *     description="Vérifie si l'utilisateur a complété son profil",
+     *     tags={"Profile"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Statut du profil",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="is_complete", type="boolean", example=true, description="Indique si le profil est complet")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non authentifié",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
      */
     public function isComplete()
     {
