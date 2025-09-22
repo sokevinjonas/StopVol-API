@@ -25,8 +25,8 @@ class AuthController extends BaseController
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"phone_number"},
-     *             @OA\Property(property="phone_number", type="string", example="+22670123456", description="Numéro de téléphone")
+     *             required={"phone"},
+     *             @OA\Property(property="phone", type="string", example="+22670123456", description="Numéro de téléphone")
      *         )
      *     ),
      *     @OA\Response(
@@ -57,21 +57,20 @@ class AuthController extends BaseController
     public function requestOtp(Request $request)
     {
         $request->validate([
-            'phone_number' => 'required|string',
+            'phone' => 'required|string',
         ], [
-            'phone_number.required' => 'Le numéro de téléphone est requis',
+            'phone.required' => 'Le numéro de téléphone est requis',
         ]);
-
         try {
-            $this->authService->requestOtp($request->phone_number);
+            $this->authService->requestOtp($request->phone);
 
             return response()->json([
-                'message' => 'OTP envoyé avec succès'
+                'message' => "OTP envoyé avec succès"
             ], 200);
 
         } catch (Exception $e) {
             return response()->json([
-                'message' => 'Erreur lors de l\'envoi de l\'OTP',
+                'message' => "Erreur lors de l'envoi de l'OTP",
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -86,8 +85,8 @@ class AuthController extends BaseController
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"phone_number", "otp"},
-     *             @OA\Property(property="phone_number", type="string", example="+22670123456", description="Numéro de téléphone"),
+     *             required={"phone", "otp"},
+     *             @OA\Property(property="phone", type="string", example="+22670123456", description="Numéro de téléphone"),
      *             @OA\Property(property="otp", type="string", example="123456", description="Code OTP à 6 chiffres")
      *         )
      *     ),
@@ -121,12 +120,12 @@ class AuthController extends BaseController
     public function verifyOtp(Request $request)
     {
         $request->validate([
-            'phone_number' => 'required|string',
+            'phone' => 'required|string',
             'otp' => 'required|digits:6',
         ]);
 
         try {
-            $data = $this->authService->verifyOtp($request->phone_number, $request->otp);
+            $data = $this->authService->verifyOtp($request->phone, $request->otp);
 
             return response()->json([
                 'message' => 'Connexion réussie',

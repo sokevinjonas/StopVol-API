@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use Exception;
+use Carbon\Carbon;
 use App\Models\User;
-use App\Helpers\OtpHelper;
+use App\Models\OtpCode;
+use Illuminate\Support\Str;
 use App\Services\NotificationService;
 
-class AuthService 
+class AuthService
 {
     protected $notificationService;
 
@@ -17,49 +19,58 @@ class AuthService
     }
 
     /**
-     * Demande OTP
+     * Générer et stocker OTP
      */
     public function requestOtp($phone)
     {
-        // Créer ou récupérer l'utilisateur
-        $user = User::firstOrCreate(['phone_number' => $phone], [
-            'role' => 'citizen',
+        $code = rand(100000, 999999);
+        $expiresAt = Carbon::now()->addMinutes(5);
+
+        // Stocker OTP dans la table otp_codes, peu importe l'envoi
+        OtpCode::create([
+            'id' => Str::uuid(),
+            'phone' => $phone,
+            'code' => $code,
+            'used' => false,
+            'expires_at' => $expiresAt,
         ]);
 
-        // Générer OTP
-        $otp = OtpHelper::generateOtp($phone);
+        // Envoyer OTP via AQILAS
+        try {
+            $this->notificationService->sendSms($phone, "Votre OTP StopVol est : $code");
+        } catch (Exception $e) {
+            // Même si l'envoi échoue, l'OTP est stocké
+        }
 
-        // Stocker l'OTP dans la colonne users.otp_code
-        $user->otp_code = $otp;
-        $user->save();
-
-        // Envoyer OTP via NotificationService (AQILAS)
-        $this->notificationService->send(
-            $user->id,
-            "OTP StopVol",
-            "Votre code OTP est : $otp"
-        );
-
-        return $otp; // optionnel
+        return $code;
     }
 
     /**
-     * Vérifier OTP et générer token
+     * Vérifier OTP et connecter/créer l'utilisateur
      */
-    public function verifyOtp($phone, $otp)
+    public function verifyOtp($phone, $code)
     {
-        $user = User::where('phone_number', $phone)->firstOrFail();
+        $otp = OtpCode::where('phone', $phone)
+            ->where('code', $code)
+            ->where('used', false)
+            ->where('expires_at', '>', Carbon::now())
+            ->first();
 
-        if ($user->otp_code !== $otp) {
+        if (!$otp) {
             throw new Exception("OTP invalide ou expiré");
         }
 
-        // Reset OTP après validation
-        $user->otp_code = null;
-        $user->save();
+        // Marquer OTP comme utilisé
+        $otp->update(['used' => true]);
 
-        // Générer token avec Sanctum
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // Créer ou récupérer l'utilisateur
+        $user = User::firstOrCreate(
+            ['phone' => $phone],
+            ['role' => 'citizen']
+        );
+
+        // Générer token API
+        $token = $user->createToken('api-token')->plainTextToken;
 
         return [
             'user' => $user,

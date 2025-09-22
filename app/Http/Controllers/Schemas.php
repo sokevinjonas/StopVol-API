@@ -11,7 +11,7 @@ use OpenApi\Attributes as OA;
  *     title="User",
  *     description="Modèle utilisateur",
  *     @OA\Property(property="id", type="string", format="uuid", example="550e8400-e29b-41d4-a716-446655440000", description="Identifiant unique de l'utilisateur"),
- *     @OA\Property(property="phone_number", type="string", example="+22670123456", description="Numéro de téléphone"),
+ *     @OA\Property(property="phone", type="string", example="+22670123456", description="Numéro de téléphone"),
  *     @OA\Property(property="name", type="string", example="Jean Dupont", description="Nom complet"),
  *     @OA\Property(property="photo", type="string", nullable=true, example="photos/user123.jpg", description="Chemin vers la photo de profil"),
  *     @OA\Property(property="document_type", type="string", enum={"cnib", "permis_conduire", "passport"}, nullable=true, example="cnib", description="Type de document d'identité"),
