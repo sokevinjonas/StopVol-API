@@ -2,47 +2,69 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use Illuminate\Http\Request;
+use App\Services\AuthService;
 
 class AuthController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    protected $authService;
+
+    public function __construct(AuthService $authService)
     {
-        //
+        $this->authService = $authService;
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Demande OTP
+     * POST /api/auth/request-otp
      */
-    public function store(Request $request)
+    public function requestOtp(Request $request)
     {
-        //
+        $request->validate([
+            'phone_number' => 'required|string',
+        ]);
+
+        try {
+            $this->authService->requestOtp($request->phone_number);
+
+            return response()->json([
+                'message' => 'OTP envoyé avec succès'
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Erreur lors de l\'envoi de l\'OTP',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
-     * Display the specified resource.
+     * Vérification OTP
+     * POST /api/auth/verify-otp
      */
-    public function show(string $id)
+    public function verifyOtp(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'phone_number' => 'required|string',
+            'otp' => 'required|digits:6',
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        try {
+            $data = $this->authService->verifyOtp($request->phone_number, $request->otp);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+            return response()->json([
+                'message' => 'Connexion réussie',
+                'user' => $data['user'],
+                'token' => $data['token']
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'OTP invalide ou expiré',
+                'error' => $e->getMessage()
+            ], 401);
+        }
     }
 }
