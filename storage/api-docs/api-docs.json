@@ -1,0 +1,998 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "StopVol API",
+        "description": "API pour la déclaration et le suivi des vols d'engins (motos, véhicules, etc.)",
+        "contact": {
+            "name": "StopVol Support",
+            "email": "contact@stopvol.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "StopVol API Server"
+        }
+    ],
+    "paths": {
+        "/api/auth/send-otp": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Envoyer un code OTP",
+                "description": "Envoie un code OTP par SMS au numéro de téléphone fourni",
+                "operationId": "bffceebe22269794653d542fb5e548dd",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "description": "Numéro de téléphone au format international",
+                                        "type": "string",
+                                        "example": "+22670123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP envoyé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Code OTP envoyé avec succès"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+22670123456"
+                                                },
+                                                "expires_in_minutes": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "can_resend_in": {
+                                                    "type": "integer",
+                                                    "example": 60
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Données invalides"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Trop de tentatives",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Trop de demandes OTP. Veuillez patienter."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/verify-otp": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Vérifier le code OTP",
+                "description": "Vérifie le code OTP et retourne un token d'authentification",
+                "operationId": "abcb5741589707b15c7ecac7a67c13aa",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "description": "Numéro de téléphone",
+                                        "type": "string",
+                                        "example": "+22670123456"
+                                    },
+                                    "code": {
+                                        "description": "Code OTP reçu par SMS",
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Authentification réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Authentification réussie"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abcdef123456..."
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+22670123456"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "citizen"
+                                                },
+                                                "profile_status": {
+                                                    "type": "string",
+                                                    "example": "incomplete"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Code OTP invalide ou expiré",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Code OTP invalide ou expiré"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Données invalides"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/resend-otp": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Renvoyer un code OTP",
+                "description": "Renvoie un nouveau code OTP au numéro de téléphone",
+                "operationId": "97c388571700f6d6d5ad133cd096195b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "description": "Numéro de téléphone",
+                                        "type": "string",
+                                        "example": "+22670123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Nouveau code OTP envoyé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Nouveau code OTP envoyé"
+                                        },
+                                        "expires_at": {
+                                            "type": "string",
+                                            "format": "datetime"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Trop de tentatives",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Veuillez attendre avant de demander un nouveau code"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/me": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Obtenir les informations de l'utilisateur connecté",
+                "description": "Retourne les informations de l'utilisateur actuellement authentifié",
+                "operationId": "b5de204f5e452ef51327c691aa99e77c",
+                "responses": {
+                    "200": {
+                        "description": "Informations utilisateur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+22670123456"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "citizen"
+                                                },
+                                                "profile_status": {
+                                                    "type": "string",
+                                                    "example": "validated"
+                                                },
+                                                "city": {
+                                                    "type": "string",
+                                                    "example": "Ouagadougou"
+                                                },
+                                                "district": {
+                                                    "type": "string",
+                                                    "example": "Secteur 15"
+                                                },
+                                                "entity_id": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Non authentifié"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Se déconnecter",
+                "description": "Révoque le token d'authentification actuel",
+                "operationId": "df9bdc6c7a6d9f20b983526b2ec0f698",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Déconnexion réussie"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Non authentifié"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/complete": {
+            "post": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Compléter le profil utilisateur",
+                "description": "Complète le profil utilisateur avec les informations personnelles et documents requis",
+                "operationId": "4a666cec853f5d35f11cbab03930ea51",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "city",
+                                    "district",
+                                    "id_type"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Nom complet",
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "city": {
+                                        "description": "Ville de résidence",
+                                        "type": "string",
+                                        "example": "Ouagadougou"
+                                    },
+                                    "district": {
+                                        "description": "Quartier/Secteur",
+                                        "type": "string",
+                                        "example": "Secteur 15"
+                                    },
+                                    "id_type": {
+                                        "description": "Type de document d'identité",
+                                        "type": "string",
+                                        "enum": [
+                                            "cnib",
+                                            "permis",
+                                            "passeport"
+                                        ],
+                                        "example": "cnib"
+                                    },
+                                    "profile_picture": {
+                                        "description": "Photo de profil",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "id_card_front": {
+                                        "description": "Recto du document d'identité",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "id_card_back": {
+                                        "description": "Verso du document d'identité",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil complété avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profil complété avec succès"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "profile_status": {
+                                                    "type": "string",
+                                                    "example": "pending_validation"
+                                                },
+                                                "profile_complete": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Données invalides"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Profil déjà complété",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Le profil est déjà complété"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/update": {
+            "put": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Mettre à jour le profil utilisateur",
+                "description": "Met à jour les informations du profil utilisateur",
+                "operationId": "c7d8a1e02c8bb3754e9ee603f0d817ca",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "description": "Nom complet",
+                                        "type": "string",
+                                        "example": "John Doe Updated"
+                                    },
+                                    "city": {
+                                        "description": "Ville de résidence",
+                                        "type": "string",
+                                        "example": "Bobo-Dioulasso"
+                                    },
+                                    "district": {
+                                        "description": "Quartier/Secteur",
+                                        "type": "string",
+                                        "example": "Secteur 20"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil mis à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profil mis à jour avec succès"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Doe Updated"
+                                                },
+                                                "city": {
+                                                    "type": "string",
+                                                    "example": "Bobo-Dioulasso"
+                                                },
+                                                "district": {
+                                                    "type": "string",
+                                                    "example": "Secteur 20"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Données invalides"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile": {
+            "get": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Obtenir le profil utilisateur",
+                "description": "Retourne les informations complètes du profil de l'utilisateur connecté",
+                "operationId": "f1784685f8270527da017b3616288443",
+                "responses": {
+                    "200": {
+                        "description": "Profil utilisateur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+22670123456"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "citizen"
+                                                },
+                                                "profile_status": {
+                                                    "type": "string",
+                                                    "example": "validated"
+                                                },
+                                                "city": {
+                                                    "type": "string",
+                                                    "example": "Ouagadougou"
+                                                },
+                                                "district": {
+                                                    "type": "string",
+                                                    "example": "Secteur 15"
+                                                },
+                                                "id_type": {
+                                                    "type": "string",
+                                                    "example": "cnib"
+                                                },
+                                                "profile_picture": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "id_card_front": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "id_card_back": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "profile_complete": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "can_create_declaration": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "entity_id": {
+                                                    "type": "string",
+                                                    "nullable": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "datetime"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "datetime"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Non authentifié"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/upload-document": {
+            "post": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Uploader un document",
+                "description": "Upload un document (photo de profil ou pièce d'identité)",
+                "operationId": "cc4159917cf1bf6b328ed82b7ef3856d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "document",
+                                    "document_type"
+                                ],
+                                "properties": {
+                                    "document": {
+                                        "description": "Fichier à uploader",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "document_type": {
+                                        "description": "Type de document",
+                                        "type": "string",
+                                        "enum": [
+                                            "profile_picture",
+                                            "id_card_front",
+                                            "id_card_back"
+                                        ],
+                                        "example": "profile_picture"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Document uploadé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Document uploadé avec succès"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "document_type": {
+                                                    "type": "string",
+                                                    "example": "profile_picture"
+                                                },
+                                                "file_path": {
+                                                    "type": "string",
+                                                    "example": "stopvol/user123/profile_picture.jpg"
+                                                },
+                                                "file_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/stopvol/user123/profile_picture.jpg"
+                                                },
+                                                "profile_complete": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Données invalides"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Utilisez le token Bearer obtenu après authentification OTP",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Endpoints d'authentification via OTP"
+        },
+        {
+            "name": "Profile",
+            "description": "Gestion du profil utilisateur"
+        }
+    ]
+}

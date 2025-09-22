@@ -18,7 +18,6 @@ return new class extends Migration
             $table->text('message');
             $table->enum('channel', ['sms','app'])->default('sms');
             $table->timestamp('sent_at')->nullable();
-            $table->timestamps();
 
             $table->foreign('declaration_id')->references('id')->on('declarations')->onDelete('cascade');
             $table->foreign('admin_id')->references('id')->on('users')->onDelete('set null');
