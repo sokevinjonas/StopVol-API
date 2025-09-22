@@ -1,0 +1,68 @@
+app/
+│
+├── Domains/
+│   ├── User/
+│   │   ├── Entities/
+│   │   │   └── User.php
+│   │   ├── Repositories/
+│   │   │   └── UserRepository.php
+│   │   ├── Services/
+│   │   │   └── UserService.php
+│   │   └── Events/
+│   │       └── UserProfileCompleted.php
+│   │
+│   ├── Declaration/
+│   │   ├── Entities/
+│   │   │   └── Declaration.php
+│   │   ├── ValueObjects/
+│   │   │   └── PlateNumber.php
+│   │   ├── Repositories/
+│   │   │   └── DeclarationRepository.php
+│   │   ├── Services/
+│   │   │   └── DeclarationService.php
+│   │   └── Events/
+│   │       └── DeclarationCreated.php
+│   │
+│   ├── Notification/
+│   │   ├── Entities/
+│   │   │   └── Notification.php
+│   │   ├── Repositories/
+│   │   │   └── NotificationRepository.php
+│   │   ├── Services/
+│   │   │   └── NotificationService.php
+│   │   └── Events/
+│   │       └── NotificationSent.php
+│   │
+│   └── OTP/
+│       ├── Entities/
+│       │   └── OtpCode.php
+│       ├── Repositories/
+│       │   └── OtpRepository.php
+│       └── Services/
+│           └── OtpService.php
+│
+├── Infrastructure/
+│   ├── Persistence/
+│   │   ├── Eloquent/
+│   │   │   ├── UserRepositoryEloquent.php
+│   │   │   ├── DeclarationRepositoryEloquent.php
+│   │   │   └── NotificationRepositoryEloquent.php
+│   └── Messaging/
+│       └── SmsSender.php
+│
+├── Http/
+│   ├── Controllers/
+│   │   ├── AuthController.php
+│   │   ├── ProfileController.php
+│   │   ├── DeclarationController.php
+│   │   └── AdminController.php
+│   └── Middleware/
+│       └── ProfileValidated.php
+│
+├── Jobs/
+│   ├── SendSmsNotification.php
+│   └── SendPushNotification.php
+│
+├── Providers/
+│   └── DomainServiceProvider.php
+└── ...
